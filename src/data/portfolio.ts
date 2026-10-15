@@ -59,10 +59,10 @@ export type Certificate = {
 export const profile = {
   name: "Ridho Febrian", // TODO: ganti dengan nama lengkap
   nickname: "Ridho", // dipakai untuk logo "Ridho." dan tekstur tali lanyard
-  roles: ["Information Systems Student", "Web Developer"], // TODO: role/tagline (berganti otomatis di hero)
+  roles: ["Informatics Engineering Student", "Web Developer"], // role/tagline (berganti otomatis di hero)
   description:
     // TODO: deskripsi singkat 2–3 kalimat
-    "I build clean, fast, and accessible web experiences. Currently studying Information Systems and exploring the intersection of design, data, and engineering.",
+    "I build clean, fast, and accessible web experiences. Currently studying Informatics Engineering and exploring the intersection of design, data, and engineering.",
   about: [
     // TODO: cerita singkat untuk section About (tiap item = satu paragraf)
     "Hi! I'm a student who enjoys turning ideas into working products. I started with small web projects and grew into building full-stack applications.",
@@ -82,9 +82,8 @@ export const contact = {
 };
 
 export const education = [
-  // TODO: isi pendidikan
-  { school: "University Name", major: "Information Systems", period: "2023 — Present" },
-  { school: "High School Name", major: "Science", period: "2020 — 2023" },
+  { school: "Universitas Lancang Kuning", major: "Teknik Informatika — Fakultas Ilmu Komputer", period: "2024 — Present" },
+  { school: "High School Name", major: "Science", period: "2021 — 2024" }, // TODO: isi SMA/SMK
 ];
 
 export const interests = [
@@ -169,10 +168,10 @@ export const experiences: Experience[] = [
     tags: ["Leadership", "Event"],
   },
   {
-    period: "2023",
+    period: "2024",
     role: "Started University",
-    org: "University Name",
-    description: "Began studying Information Systems.",
+    org: "Universitas Lancang Kuning",
+    description: "Began studying Informatics Engineering at the Faculty of Computer Science.",
     tags: ["Education"],
   },
 ];

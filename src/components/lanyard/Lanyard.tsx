@@ -28,6 +28,8 @@ declare module "@react-three/fiber" {
   }
 }
 
+const RING_TOP = CARD_H / 2 + 0.3; // top of the metal ring, where the rope attaches
+
 type Body = RapierRigidBody & { lerped?: THREE.Vector3 };
 
 export default function Lanyard({ active = true }: { active?: boolean }) {
@@ -41,7 +43,8 @@ export default function Lanyard({ active = true }: { active?: boolean }) {
       style={{ touchAction: "pan-y" }}
     >
       <ambientLight intensity={Math.PI} />
-      <Physics interpolate gravity={[0, -40, 0]} timeStep={1 / 60} paused={!active}>
+      {/* updatePriority < 0: step + interpolate bodies before Band reads them, so the rope never lags a frame */}
+      <Physics interpolate gravity={[0, -40, 0]} timeStep={1 / 60} paused={!active} updatePriority={-1}>
         <Band />
       </Physics>
       <Environment blur={0.75}>
@@ -94,6 +97,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
   const j2 = useRef<Body>(null!);
   const j3 = useRef<Body>(null!);
   const card = useRef<Body>(null!);
+  const ringTop = useRef<THREE.Object3D>(null!);
   const tex = useCardTextures();
   const { width, height } = useThree((s) => s.size);
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
@@ -112,7 +116,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
-  useSphericalJoint(j3, card, [[0, 0, 0], [0, CARD_H / 2 + 0.32, 0]]);
+  useSphericalJoint(j3, card, [[0, 0, 0], [0, RING_TOP, 0]]);
 
   useEffect(() => {
     if (!hovered) return;
@@ -140,7 +144,8 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
       // Clamp: a long frame (or resuming from pause) would overshoot and blow up to NaN
       b.lerped.lerp(b.translation(), Math.min(1, delta * (minSpeed + d * (maxSpeed - minSpeed))));
     });
-    curve.points[0].copy(j3.current.translation());
+    // Pin the rope end to the rendered ring, not the (slightly springy) joint body
+    ringTop.current.getWorldPosition(curve.points[0]);
     curve.points[1].copy(j2.current.lerped!);
     curve.points[2].copy(j1.current.lerped!);
     curve.points[3].copy(fixed.current.translation());
@@ -148,7 +153,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
     // Gently turn the card back to face the camera
     ang.copy(card.current.angvel());
     rot.copy(card.current.rotation());
-    card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z }, true);
+    card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z }, false); // false: let the card fall asleep once it settles
   });
 
   return (
@@ -194,6 +199,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
               <boxGeometry args={[0.36, 0.14, 0.06]} />
               <meshStandardMaterial color="#9ca3af" metalness={1} roughness={0.25} />
             </mesh>
+            <object3D ref={ringTop} position={[0, RING_TOP, 0]} />
             <mesh position={[0, CARD_H / 2 + 0.2, 0]}>
               <torusGeometry args={[0.1, 0.022, 12, 32]} />
               <meshStandardMaterial color="#d4d4d4" metalness={1} roughness={0.2} />

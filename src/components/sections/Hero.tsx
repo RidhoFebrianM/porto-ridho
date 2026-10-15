@@ -105,7 +105,7 @@ export default function Hero() {
         </div>
 
         {/* Desktop: the 3D canvas spans the whole hero (click-through) so the card can be thrown anywhere */}
-        <div className="order-1 h-[60svh] min-h-[420px] lg:pointer-events-none lg:absolute lg:inset-0 lg:h-auto">
+        <div className="order-1 h-[75svh] min-h-[520px] lg:pointer-events-none lg:absolute lg:inset-0 lg:h-auto">
           <LanyardLoader eventSource={section} />
         </div>
       </div>

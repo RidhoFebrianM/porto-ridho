@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { FiArrowRight, FiDownload, FiGithub, FiLinkedin } from "react-icons/fi";
 import { contact, profile } from "@/data/portfolio";
@@ -37,12 +37,13 @@ const btn =
   "glow inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm font-medium transition-colors";
 
 export default function Hero() {
+  const section = useRef<HTMLElement>(null);
   const words = `Hi, I'm ${profile.name}`.split(" ");
 
   return (
-    <section id="home" className="relative overflow-hidden pt-16">
-      <div aria-hidden className="dots pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-4 px-4 md:px-6 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-2">
+    <section ref={section} id="home" className="relative overflow-hidden pt-16">
+      <div aria-hidden className="dots pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-4 px-4 md:px-6 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-2">
         <div className="order-2 pb-16 lg:order-1 lg:pb-0">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -103,8 +104,9 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        <div className="order-1 h-[340px] lg:order-2 lg:h-[min(760px,calc(100svh-4rem))]">
-          <LanyardLoader />
+        {/* Desktop: the 3D canvas spans the whole hero (click-through) so the card can be thrown anywhere */}
+        <div className="order-1 h-[340px] lg:pointer-events-none lg:absolute lg:inset-0 lg:h-auto">
+          <LanyardLoader eventSource={section} />
         </div>
       </div>
     </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { useReducedMotion } from "@/lib/useMedia";
 import StaticCard from "./StaticCard";
@@ -12,9 +12,16 @@ const Fallback = () => (
   </div>
 );
 
-const Lanyard = dynamic(() => import("./Lanyard"), { ssr: false, loading: Fallback });
+const Lanyard = dynamic(() => import("./Lanyard"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full lg:ml-auto lg:w-1/2">
+      <Fallback />
+    </div>
+  ),
+});
 
-export default function LanyardLoader() {
+export default function LanyardLoader({ eventSource }: { eventSource: RefObject<HTMLElement | null> }) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -35,8 +42,13 @@ export default function LanyardLoader() {
   }, []);
 
   return (
-    <div ref={ref} className="h-full w-full" role="img" aria-label="Interactive ID badge hanging from a lanyard">
-      {reduced ? <StaticCard /> : ready ? <Lanyard active={visible} /> : <Fallback />}
+    <div ref={ref} className="h-full w-full touch-pan-y" role="img" aria-label="Interactive ID badge hanging from a lanyard">
+      {reduced || !ready ? (
+        // On desktop the wrapper spans the whole hero; keep 2D content in the right half
+        <div className="h-full lg:ml-auto lg:w-1/2">{reduced ? <StaticCard /> : <Fallback />}</div>
+      ) : (
+        <Lanyard active={visible} eventSource={eventSource} />
+      )}
     </div>
   );
 }

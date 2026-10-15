@@ -1,7 +1,7 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Canvas, extend, useFrame, useThree, type ThreeElement } from "@react-three/fiber";
 import { Environment, Lightformer, RoundedBox } from "@react-three/drei";
 import {
@@ -32,20 +32,22 @@ const RING_TOP = CARD_H / 2 + 0.3; // top of the metal ring, where the rope atta
 
 type Body = RapierRigidBody & { lerped?: THREE.Vector3 };
 
-export default function Lanyard({ active = true }: { active?: boolean }) {
+export default function Lanyard({ active = true, eventSource }: { active?: boolean; eventSource: RefObject<HTMLElement | null> }) {
   return (
     <Canvas
       camera={{ position: [0, 0, 12], fov: 25 }}
       dpr={[1, 2]}
       gl={{ alpha: true, antialias: true }}
       frameloop={active ? "always" : "never"}
-      // Vertical swipes still scroll the page on touch; horizontal ones throw the card
-      style={{ touchAction: "pan-y" }}
+      // Canvas is click-through; pointer events come from the hero section so text and buttons stay usable
+      eventSource={eventSource as RefObject<HTMLElement>}
+      eventPrefix="client"
+      style={{ pointerEvents: "none" }}
     >
       <ambientLight intensity={Math.PI} />
       {/* updatePriority < 0: step + interpolate bodies before Band reads them, so the rope never lags a frame */}
       <Physics interpolate gravity={[0, -40, 0]} timeStep={1 / 60} paused={!active} updatePriority={-1}>
-        <Band />
+        <Rig />
       </Physics>
       <Environment blur={0.75}>
         <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
@@ -90,7 +92,17 @@ function useCardTextures() {
   return tex;
 }
 
-function Band({ maxSpeed = 50, minSpeed = 10 }) {
+/** Hangs the lanyard over the right grid column on desktop, centred on mobile. */
+function Rig() {
+  const { size, viewport } = useThree();
+  // Right column centre ≈ a quarter of the max-w-6xl (1152px) content width right of centre
+  const px = size.width >= 1024 ? Math.min(size.width, 1152) / 4 : 0;
+  const x = Math.round(px * (viewport.width / size.width) * 2) / 2;
+  // Physics bodies keep their spawn position, so remount when the anchor moves (resize)
+  return <Band key={x} x={x} />;
+}
+
+function Band({ x = 0, maxSpeed = 50, minSpeed = 10 }) {
   const band = useRef<THREE.Mesh<MeshLineGeometry>>(null!);
   const fixed = useRef<Body>(null!);
   const j1 = useRef<Body>(null!);
@@ -117,6 +129,15 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
   useSphericalJoint(j3, card, [[0, 0, 0], [0, RING_TOP, 0]]);
+
+  useEffect(() => {
+    if (!dragged) return;
+    // The canvas now overlaps the hero text; don't select it while dragging the card across
+    document.body.style.userSelect = "none";
+    return () => {
+      document.body.style.userSelect = "";
+    };
+  }, [dragged]);
 
   useEffect(() => {
     if (!hovered) return;
@@ -158,7 +179,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
 
   return (
     <>
-      <group position={[0, 4, 0]}>
+      <group position={[x, 4, 0]}>
         <RigidBody ref={fixed} {...segment} type="fixed" />
         <RigidBody position={[0.5, 0, 0]} ref={j1} {...segment}>
           <BallCollider args={[0.1]} />

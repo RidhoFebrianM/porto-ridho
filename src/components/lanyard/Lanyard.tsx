@@ -169,7 +169,7 @@ function Band({ maxSpeed = 50, minSpeed = 10 }) {
         <RigidBody position={[1.5, 0, 0]} ref={j3} {...segment}>
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={[2, -1.5, 0]} ref={card} {...segment} type={dragged ? "kinematicPosition" : "dynamic"}>
+        <RigidBody position={[2, -1.5, 0]} ref={card} {...segment} linearDamping={4} angularDamping={6} /* heavier damping than the rope: card settles fast, throws still swing */ type={dragged ? "kinematicPosition" : "dynamic"}>
           <CuboidCollider args={[CARD_W / 2, CARD_H / 2, 0.01]} />
           <group
             onPointerOver={() => hover(true)}

@@ -6,6 +6,7 @@ export const CARD_W = 1.6;
 export const CARD_H = 2.25;
 const W = 512;
 const H = 720;
+const S = 2; // texture pixels per layout unit; 2x keeps the photo and text sharp on HiDPI screens
 
 const fontVar = (name: string, fallback: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
@@ -13,6 +14,7 @@ const fontVar = (name: string, fallback: string) =>
 const host = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "");
 
 function base(ctx: CanvasRenderingContext2D) {
+  ctx.setTransform(S, 0, 0, S, 0, 0);
   ctx.clearRect(0, 0, W, H);
   ctx.save();
   ctx.beginPath();
@@ -57,7 +59,7 @@ export function drawFront(canvas: HTMLCanvasElement, photo?: HTMLImageElement) {
   ctx.textAlign = "left";
 
   // Photo (grayscale, object-fit: cover) or initials fallback
-  const px = 48, py = 120, pw = W - 96, ph = 370;
+  const px = 48, py = 116, pw = W - 96, ph = 440;
   ctx.save();
   ctx.beginPath();
   ctx.roundRect(px, py, pw, ph, 18);
@@ -68,7 +70,9 @@ export function drawFront(canvas: HTMLCanvasElement, photo?: HTMLImageElement) {
     const s = Math.max(pw / photo.width, ph / photo.height);
     const w = photo.width * s, h = photo.height * s;
     ctx.filter = "grayscale(1) contrast(1.1)";
-    ctx.drawImage(photo, px + (pw - w) / 2, py + (ph - h) / 2, w, h);
+    ctx.imageSmoothingQuality = "high";
+    // Bias the crop upward (40/60) so the head keeps some headroom
+    ctx.drawImage(photo, px + (pw - w) / 2, py + (ph - h) * 0.4, w, h);
     ctx.filter = "none";
   } else {
     ctx.fillStyle = "#525252";
@@ -80,14 +84,14 @@ export function drawFront(canvas: HTMLCanvasElement, photo?: HTMLImageElement) {
   ctx.restore();
 
   ctx.fillStyle = "#fafafa";
-  fitText(ctx, profile.name, 48, 556, W - 96, 40, display);
+  fitText(ctx, profile.name, 48, 602, W - 96, 40, display);
   ctx.fillStyle = "#a3a3a3";
-  fitText(ctx, profile.roles[0], 48, 594, W - 96, 20, mono, 500);
+  fitText(ctx, profile.roles[0], 48, 632, W - 96, 20, mono, 500);
 
   ctx.fillStyle = "#2a2a2a";
-  ctx.fillRect(48, 626, W - 96, 2);
+  ctx.fillRect(48, 650, W - 96, 2);
   ctx.fillStyle = "#737373";
-  fitText(ctx, host(contact.github), 48, 668, W - 96, 16, mono, 500);
+  fitText(ctx, host(contact.github), 48, 682, W - 96, 16, mono, 500);
   ctx.restore();
 }
 
@@ -138,8 +142,8 @@ export function makeBandTexture() {
 
 export function makeCardTexture(draw: (c: HTMLCanvasElement) => void) {
   const c = document.createElement("canvas");
-  c.width = W;
-  c.height = H;
+  c.width = W * S;
+  c.height = H * S;
   draw(c);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;

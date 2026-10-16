@@ -9,7 +9,7 @@ export default function StaticCard() {
       <div aria-hidden className="h-4 w-12 rounded-sm bg-gradient-to-b from-neutral-300 to-neutral-500" />
       <figure className="w-[min(60%,260px)] rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-4 text-neutral-50 shadow-2xl">
         <p className="font-display text-lg font-bold">{profile.nickname}.</p>
-        <div className="relative mt-3 aspect-[416/370] overflow-hidden rounded-lg bg-neutral-800">
+        <div className="relative mt-3 aspect-[416/440] overflow-hidden rounded-lg bg-neutral-800">
           <Image src={profile.photo} alt={profile.name} fill sizes="260px" className="object-cover grayscale" />
         </div>
         <figcaption className="mt-3">

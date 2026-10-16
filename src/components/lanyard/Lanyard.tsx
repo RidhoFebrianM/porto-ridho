@@ -20,6 +20,19 @@ import { CARD_H, CARD_W, drawBack, drawFront, makeBandTexture, makeCardTexture }
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
+// Library warnings we can't fix: r3f still creates THREE.Clock, and ANGLE (Windows) prints shader precision notes
+const QUIET = ["Clock: This module has been deprecated", "WebGLProgram: Program Info Log"];
+THREE.setConsoleFunction((type: "log" | "warn" | "error", msg: string, ...rest: unknown[]) => {
+  if (type !== "error" && QUIET.some((q) => msg.includes(q))) return;
+  console[type](msg, ...rest);
+});
+// shortcut: hides rapier3d-compat's own init() deprecation warning; drop once @react-three/rapier passes an object
+const warn = console.warn;
+console.warn = (...args: unknown[]) => {
+  if (typeof args[0] === "string" && args[0].startsWith("using deprecated parameters for the initialization function")) return;
+  warn(...args);
+};
+
 declare module "@react-three/fiber" {
   interface ThreeElements {
     meshLineGeometry: ThreeElement<typeof MeshLineGeometry>;

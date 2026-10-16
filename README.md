@@ -35,7 +35,7 @@ Kode ada di `src/components/lanyard/`:
 
 Tidak ada file `.glb`. Kartunya dibuat dari geometri, dan teksturnya digambar saat runtime.
 
-- **Foto**: ganti `public/images/photo.jpg`. Rasio terbaik kira-kira 9:8 (area foto di kartu 416×370). Foto otomatis dibuat grayscale. Kalau file tidak ada, kartu menampilkan inisial.
+- **Foto**: taruh di `public/images/` lalu sesuaikan `profile.photo` di `src/data/portfolio.ts` (pakai nama file baru tiap ganti foto supaya tidak kena cache browser). Rasio terbaik kira-kira 9:8 (area foto di kartu 416×370). Foto otomatis dibuat grayscale. Kalau file tidak ada, kartu menampilkan inisial.
 - **Teks kartu**: nama, role pertama, nickname, dan host GitHub diambil dari `portfolio.ts`.
 - **Desain kartu**: edit `drawFront` / `drawBack` di `textures.ts` (Canvas 2D API biasa, 512×720 px).
 - **Tekstur tali**: edit `makeBandTexture` di `textures.ts`. Kalau mau memakai gambar, ganti dengan `new THREE.TextureLoader().load("/images/band.png")` dan set `wrapS = wrapT = THREE.RepeatWrapping`.

@@ -69,7 +69,7 @@ export const profile = {
     "Outside of code, I like learning about UI design, data, and how technology can solve everyday problems.",
   ],
   cv: "/cv/cv.pdf",
-  photo: "/images/photo.jpg", // foto untuk kartu lanyard (akan dibuat grayscale)
+  photo: "/images/ridho.jpg", // foto untuk kartu lanyard (akan dibuat grayscale). Ganti foto = ganti nama file juga, biar cache browser tidak menampilkan yang lama
   siteUrl: "https://porto-ridho.vercel.app", // TODO: ganti dengan domain Vercel kamu
   copyrightYear: 2026,
 };
